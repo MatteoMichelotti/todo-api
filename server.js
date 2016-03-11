@@ -41,6 +41,19 @@ app.post("/todos", function (req, res){
 	res.json(body);
 });
 
+app.delete("/todos/:id", function (req, res) {
+	var newTodos = _.reject(todos, function (todo) {
+		return todo.id === parseInt(req.params.id, 10);
+	});
+
+	if (newTodos.length === todos.length){
+		res.status(404).send();
+	} else {
+		todos = newTodos;
+		res.json(todos);
+	}
+});
+
 
 app.listen(PORT, function() {
 	console.log("Server started on port: " + PORT);

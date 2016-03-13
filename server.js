@@ -16,7 +16,7 @@ app.get("/", function (req, res){
 });
 
 app.get("/todos", function (req, res) {
-	var queryParams = _.pick(req.query, ["description", "completed"]);
+	var queryParams = _.pick(req.query, ["q", "completed"]);
 	var filteredTodos = todos;
 
 	if (queryParams.hasOwnProperty("completed")){
@@ -26,6 +26,16 @@ app.get("/todos", function (req, res) {
 			filteredTodos = _.where(filteredTodos, {completed: false});
 		} else {
 			return res.status(400).send();
+		}
+	}
+
+	if (queryParams.hasOwnProperty("q")){
+		if (queryParams.q.length > 0){
+			filteredTodos = _.filter(filteredTodos, function (todo){
+				return (todo.description.toLowerCase().search(queryParams.q.toLowerCase()) > -1);
+			});
+		} else {
+			res.status(400).send();
 		}
 	}
 

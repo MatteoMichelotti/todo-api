@@ -72,16 +72,22 @@ app.post("/todos", function(req, res) {
 });
 
 app.delete("/todos/:id", function(req, res) {
-	var newTodos = _.reject(todos, function(todo) {
-		return todo.id === parseInt(req.params.id, 10);
-	});
 
-	if (newTodos.length === todos.length) {
-		res.status(404).send();
-	} else {
-		todos = newTodos;
-		res.json(todos);
-	}
+	var todoId = parseInt(req.params.id, 10);
+
+	db.todo.destroy({
+		where: {
+			id: todoId
+		}
+	}).then(function (num){
+		if (num>0) {
+			res.send("Todo Deleted ("+num+")");
+		} else {
+			res.status(404).send("Todo not found");
+		}
+	}, function (err){
+		res.status(500).send();
+	});
 });
 
 app.put("todos/:id", function(req, res) {

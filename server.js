@@ -12,10 +12,13 @@ var nextTodoId = 1;
 
 app.use(bodyParser.json());
 
+//==== ROOT ROUTE ====
 app.get("/", function (req, res) {
 	res.send("Todo API root");
 });
 
+//==== TODO ROUTES ====
+//---- INDEX ----
 app.get("/todos", function (req, res) {
 	var query = _.pick(req.query, ["q", "completed"]);
 	var where = {};
@@ -49,6 +52,7 @@ app.get("/todos", function (req, res) {
 	});
 });
 
+//---- SHOW ----
 app.get("/todos/:id", function (req, res) {
 	var todoId = parseInt(req.params.id, 10);
 
@@ -63,6 +67,7 @@ app.get("/todos/:id", function (req, res) {
 	});
 });
 
+//---- CREATE ----
 app.post("/todos", function (req, res) {
 	var body = _.pick(req.body, ["description", "completed"]);
 
@@ -73,6 +78,7 @@ app.post("/todos", function (req, res) {
 	});
 });
 
+//---- DESTROY ----
 app.delete("/todos/:id", function (req, res) {
 
 	var todoId = parseInt(req.params.id, 10);
@@ -92,6 +98,7 @@ app.delete("/todos/:id", function (req, res) {
 	});
 });
 
+//---- UPDATE ----
 app.put("/todos/:id", function (req, res) {
 	var body = _.pick(req.body, ["description", "completed"]);
 	var todoId = parseInt(req.params.id, 10);
@@ -120,7 +127,20 @@ app.put("/todos/:id", function (req, res) {
 	});
 });
 
+//==== USER ROUTES ====
+//---- CREATE ----
+app.post("/users", function (req,res){
+	var body = _.pick(req.body, ["email", "password"]);
 
+	db.user.create(body).then(function (user){
+		res.json(user.toJSON());
+	}, function (err){
+		res.status(400).json(err);
+	})
+});
+
+
+//==== LISTENER ====
 db.sequelize.sync().then(function () {
 	app.listen(PORT, function () {
 		console.log("Server started on port: " + PORT);

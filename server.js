@@ -133,7 +133,7 @@ app.post("/users", function (req,res){
 	var body = _.pick(req.body, ["email", "password"]);
 
 	db.user.create(body).then(function (user){
-		res.json(user.toJSON());
+		res.json(user.toPublicJSON());
 	}, function (err){
 		res.status(400).json(err);
 	})
@@ -141,7 +141,7 @@ app.post("/users", function (req,res){
 
 
 //==== LISTENER ====
-db.sequelize.sync().then(function () {
+db.sequelize.sync({force: true}).then(function () {
 	app.listen(PORT, function () {
 		console.log("Server started on port: " + PORT);
 	});

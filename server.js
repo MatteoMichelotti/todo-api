@@ -1,7 +1,8 @@
-var express = require("express"),
+var express    = require("express"),
 	bodyParser = require("body-parser"),
-	_ = require("underscore"),
-	db = require("./db.js");
+	_          = require("underscore"),
+	bcryptjs   = require("bcryptjs"),
+	db         = require("./db.js");
 
 var app = express();
 
@@ -129,7 +130,7 @@ app.put("/todos/:id", function (req, res) {
 
 //==== USER ROUTES ====
 //---- CREATE ----
-app.post("/users", function (req,res){
+app.post("/users", function (req, res){
 	var body = _.pick(req.body, ["email", "password"]);
 
 	db.user.create(body).then(function (user){
@@ -139,9 +140,20 @@ app.post("/users", function (req,res){
 	})
 });
 
+//---- LOGIN ----
+app.post("/users/login", function (req, res){
+	var body = _.pick(req.body, ["email", "password"]);
+
+	db.user.authenticate(body).then(function (user){
+		res.json(user.toPublicJSON());
+	}, function (err){
+		res.status(err.status).send();
+	});
+});
+
 
 //==== LISTENER ====
-db.sequelize.sync({force: true}).then(function () {
+db.sequelize.sync().then(function () {
 	app.listen(PORT, function () {
 		console.log("Server started on port: " + PORT);
 	});

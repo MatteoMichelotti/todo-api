@@ -1,8 +1,10 @@
-var express    = require("express"),
-	bodyParser = require("body-parser"),
-	_          = require("underscore"),
-	bcryptjs   = require("bcryptjs"),
-	db         = require("./db.js");
+var    express = require("express"),
+	  bcryptjs = require("bcryptjs"),
+	         _ = require("underscore"),
+	bodyParser = require("body-parser");
+
+var         db  = require("./db.js"),
+	middleware  = require("./middleware.js")(db);
 
 var app = express();
 
@@ -20,7 +22,7 @@ app.get("/", function (req, res) {
 
 //==== TODO ROUTES ====
 //---- INDEX ----
-app.get("/todos", function (req, res) {
+app.get("/todos", middleware.requireAuthentication, function (req, res) {
 	var query = _.pick(req.query, ["q", "completed"]);
 	var where = {};
 
@@ -54,7 +56,7 @@ app.get("/todos", function (req, res) {
 });
 
 //---- SHOW ----
-app.get("/todos/:id", function (req, res) {
+app.get("/todos/:id", middleware.requireAuthentication, function (req, res) {
 	var todoId = parseInt(req.params.id, 10);
 
 	db.todo.findById(todoId).then(function (foundTodo) {
@@ -69,7 +71,7 @@ app.get("/todos/:id", function (req, res) {
 });
 
 //---- CREATE ----
-app.post("/todos", function (req, res) {
+app.post("/todos", middleware.requireAuthentication, function (req, res) {
 	var body = _.pick(req.body, ["description", "completed"]);
 
 	db.todo.create(body).then(function (todo) {
@@ -80,7 +82,7 @@ app.post("/todos", function (req, res) {
 });
 
 //---- DESTROY ----
-app.delete("/todos/:id", function (req, res) {
+app.delete("/todos/:id", middleware.requireAuthentication, function (req, res) {
 
 	var todoId = parseInt(req.params.id, 10);
 
@@ -100,7 +102,7 @@ app.delete("/todos/:id", function (req, res) {
 });
 
 //---- UPDATE ----
-app.put("/todos/:id", function (req, res) {
+app.put("/todos/:id", middleware.requireAuthentication, function (req, res) {
 	var body = _.pick(req.body, ["description", "completed"]);
 	var todoId = parseInt(req.params.id, 10);
 	var attributes = {};
@@ -159,7 +161,7 @@ app.post("/users/login", function (req, res){
 
 
 //==== LISTENER ====
-db.sequelize.sync().then(function () {
+db.sequelize.sync({force: true}).then(function () {
 	app.listen(PORT, function () {
 		console.log("Server started on port: " + PORT);
 	});
